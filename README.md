@@ -1,1 +1,0 @@
-# coinmarket-scraper
