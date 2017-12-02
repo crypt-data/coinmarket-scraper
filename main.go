@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/kr/pretty"
 )
@@ -16,20 +17,29 @@ func main() {
 		Path:   "data/histohour",
 	}
 
-	q := url.Query()
-	for k, v := range map[string]string{
-		"fsym":      "ETH",
-		"tsym":      "BTC",
-		"limit":     "60",
-		"aggregate": "1",
-		"toTs":      "1439521878",
-	} {
-		q.Set(k, v)
+	t := 1439521878
+	for h := 0; h < 24*5; h++ {
+
+		t_str := strconv.Itoa(t)
+
+		q := url.Query()
+		for k, v := range map[string]string{
+			"fsym":      "ETH",
+			"tsym":      "BTC",
+			"limit":     "60",
+			"aggregate": "1",
+			"toTs":      t_str,
+		} {
+			q.Set(k, v)
+		}
+		url.RawQuery = q.Encode()
+
+		pretty.Logln(url)
+
+		res, _ := http.Get(url.String())
+		body, _ := ioutil.ReadAll(res.Body)
+		pretty.Logln(string(body))
+
+		t += h * 60 * 60
 	}
-	url.RawQuery = q.Encode()
-
-	res, _ := http.Get(url.String())
-	body, _ := ioutil.ReadAll(res.Body)
-	pretty.Logln(string(body))
-
 }
