@@ -20,15 +20,13 @@ func main() {
 	t := 1439521878
 	for h := 0; h < 24*5; h++ {
 
-		t_str := strconv.Itoa(t)
-
 		q := url.Query()
 		for k, v := range map[string]string{
 			"fsym":      "ETH",
 			"tsym":      "BTC",
 			"limit":     "60",
 			"aggregate": "1",
-			"toTs":      t_str,
+			"toTs":      strconv.Itoa(t),
 		} {
 			q.Set(k, v)
 		}
