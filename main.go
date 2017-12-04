@@ -37,14 +37,31 @@ type Tick struct {
 
 func (tick *Tick) Put() {
 
-	var db *sql.DB
+	db, err := sql.Open("sqlite3", "/keybase/team/crypt_data/EthToBtc.db")
+	if err != nil {
+		log.Fatal("failed to open db", err)
+	}
+
+	if _, err := db.Exec(`create table if not exists EthToBtc (
+
+				      time integer not null,
+				      close real not null,
+				      high real not null,
+				      low real not null,
+				      open real not null,
+				      volumefrom real not null,
+				      volumeto real not null,
+
+                                      primary key (time))`); err != nil {
+		log.Fatal("failed to create table", err)
+	}
 
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal("failed getting tx", err)
 	}
 
-	stmt, err := tx.Prepare("insert or replace into ticks (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert or replace into EthToBtc (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal("failed preparing tick", tick, err)
 	}
@@ -106,6 +123,10 @@ func main() {
 			log.Fatal(err)
 		}
 		pretty.Logln(resp)
+
+		for _, tick := range resp.Data {
+			tick.Put()
+		}
 
 		t += h * 60 * 60
 	}
