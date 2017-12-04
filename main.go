@@ -15,7 +15,7 @@ import (
 	"github.com/kr/pretty"
 )
 
-func get(u url.URL) *api.Response {
+func get(u *url.URL) *api.Response {
 
 	res, err := http.Get(u.String())
 	if err != nil {
@@ -36,9 +36,25 @@ func get(u url.URL) *api.Response {
 	return &resp
 }
 
+func setQuery(u *url.URL, t int) {
+
+	q := u.Query()
+	for k, v := range map[string]string{
+		"fsym":      "ETH",
+		"tsym":      "BTC",
+		"limit":     "60",
+		"aggregate": "1",
+		"toTs":      strconv.Itoa(t),
+	} {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
+
+}
+
 func main() {
 
-	var u = url.URL{
+	var u = &url.URL{
 		Scheme: "https",
 		Host:   "min-api.cryptocompare.com",
 		Path:   "data/histohour",
@@ -47,19 +63,9 @@ func main() {
 	t := 1439521878
 	for h := 0; h < 24*5; h++ {
 
-		q := u.Query()
-		for k, v := range map[string]string{
-			"fsym":      "ETH",
-			"tsym":      "BTC",
-			"limit":     "60",
-			"aggregate": "1",
-			"toTs":      strconv.Itoa(t),
-		} {
-			q.Set(k, v)
-		}
-		u.RawQuery = q.Encode()
-
 		pretty.Logln(u)
+
+		setQuery(u, t)
 
 		resp := get(u)
 

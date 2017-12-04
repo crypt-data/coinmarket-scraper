@@ -58,36 +58,40 @@ func (tick *Tick) Put() {
 	}
 
 	for {
-
-		tx, err := db.Begin()
-		if err != nil {
-			log.Println("failed getting tx", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-
-		stmt, err := tx.Prepare("insert or replace into EthToBtc (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
-		if err != nil {
-			log.Println("failed preparing tick", tick, err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		defer stmt.Close()
-
-		_, err = stmt.Exec(tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
-		if err != nil {
-			log.Println("failed execing tick", tick, err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-
-		if err := tx.Commit(); err != nil {
-			log.Println("failed committing tick", tick, err)
+		if err := tick.put(); err != nil {
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		return
 	}
+}
+
+func (tick *Tick) put() error {
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Println("failed getting tx", err)
+		return err
+	}
+
+	stmt, err := tx.Prepare("insert or replace into EthToBtc (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Println("failed preparing tick", tick, err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
+	if err != nil {
+		log.Println("failed execing tick", tick, err)
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Println("failed committing tick", tick, err)
+		return err
+	}
+	return nil
 }
 
 type ConversionTypeStruct struct {
