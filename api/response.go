@@ -103,6 +103,7 @@ func (tick *Tick) put() error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+	logger.Info(fmt.Sprintf("successfully inserted tick (%d, %f, %f, %f, %f, %f, %f)", tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo))
 	return nil
 }
 
