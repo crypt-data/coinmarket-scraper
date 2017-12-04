@@ -42,17 +42,12 @@ func (tick *Tick) Put() {
 		log.Fatal("failed to open db", err)
 	}
 
-	if _, err := db.Exec(`create table if not exists EthToBtc (
+	b, err := ioutil.ReadFile("create_table.sql")
+	if err != nil {
+		log.Fatal("failed to read create_table.sql", err)
+	}
 
-				      time integer not null,
-				      close real not null,
-				      high real not null,
-				      low real not null,
-				      open real not null,
-				      volumefrom real not null,
-				      volumeto real not null,
-
-                                      primary key (time))`); err != nil {
+	if _, err := db.Exec(string(b)); err != nil {
 		log.Fatal("failed to create table", err)
 	}
 
