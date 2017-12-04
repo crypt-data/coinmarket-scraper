@@ -14,9 +14,30 @@ import (
 	"github.com/kr/pretty"
 )
 
+func get(u url.URL) *api.Response {
+
+	res, err := http.Get(u.String())
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var resp api.Response
+	err = json.Unmarshal(body, &resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	pretty.Logln(resp)
+
+	return &resp
+}
+
 func main() {
 
-	var url = url.URL{
+	var u = url.URL{
 		Scheme: "https",
 		Host:   "min-api.cryptocompare.com",
 		Path:   "data/histohour",
@@ -25,7 +46,7 @@ func main() {
 	t := 1439521878
 	for h := 0; h < 24*5; h++ {
 
-		q := url.Query()
+		q := u.Query()
 		for k, v := range map[string]string{
 			"fsym":      "ETH",
 			"tsym":      "BTC",
@@ -35,25 +56,11 @@ func main() {
 		} {
 			q.Set(k, v)
 		}
-		url.RawQuery = q.Encode()
+		u.RawQuery = q.Encode()
 
-		pretty.Logln(url)
+		pretty.Logln(u)
 
-		res, err := http.Get(url.String())
-		if err != nil {
-			log.Fatal(err)
-		}
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		var resp api.Response
-		err = json.Unmarshal(body, &resp)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pretty.Logln(resp)
+		resp := get(u)
 
 		for _, tick := range resp.Data {
 			tick.Put()
