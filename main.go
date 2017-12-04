@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/crypt-data/coinmarket-scraper/api"
 	"github.com/kr/pretty"
 )
 
@@ -47,7 +48,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		var resp Response
+		var resp api.Response
 		err = json.Unmarshal(body, &resp)
 		if err != nil {
 			log.Fatal(err)

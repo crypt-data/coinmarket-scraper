@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"database/sql"
@@ -7,6 +7,8 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+var db *sql.DB
 
 type Response struct {
 	Status            string               `json:"Response"`
@@ -29,12 +31,18 @@ type Tick struct {
 	VolumeTo   float64 `json:"volumeto"`
 }
 
-func (tick *Tick) Put() {
-
-	db, err := sql.Open("sqlite3", "/keybase/team/crypt_data/EthToBtc.db")
+func Init() {
+	database, err := sql.Open("sqlite3", "/keybase/team/crypt_data/EthToBtc.db")
 	if err != nil {
 		log.Fatal("failed to open db", err)
 	}
+
+	db = database
+}
+
+func (tick *Tick) Put() {
+
+	Init()
 
 	b, err := ioutil.ReadFile("create_table.sql")
 	if err != nil {
