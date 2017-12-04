@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -67,5 +68,7 @@ func main() {
 		}
 
 		t += h * 60 * 60
+
+		time.Sleep(time.Second)
 	}
 }

@@ -37,20 +37,23 @@ func Init() {
 		log.Fatal("failed to open db", err)
 	}
 
-	db = database
-}
-
-func (tick *Tick) Put() {
-
-	Init()
-
 	b, err := ioutil.ReadFile("create_table.sql")
 	if err != nil {
 		log.Fatal("failed to read create_table.sql", err)
 	}
 
+	db = database
+
 	if _, err := db.Exec(string(b)); err != nil {
 		log.Fatal("failed to create table", err)
+	}
+}
+
+func (tick *Tick) Put() {
+
+	// lazily load db
+	if db == nil {
+		Init()
 	}
 
 	tx, err := db.Begin()
