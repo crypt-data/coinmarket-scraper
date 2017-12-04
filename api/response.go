@@ -52,7 +52,7 @@ func Init() {
 	}
 	db = database
 
-	b, err := ioutil.ReadFile("create_table.sql")
+	b, err := ioutil.ReadFile("/Users/atec/go/src/github.com/crypt-data/coinmarket-scraper/create_table.sql")
 	if err != nil {
 		logger.Emerg("failed to read create_table.sql")
 		log.Fatal("unix:", err)
