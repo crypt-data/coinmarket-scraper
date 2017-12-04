@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -61,11 +62,20 @@ func main() {
 
 		pretty.Logln(url)
 
-		res, _ := http.Get(url.String())
-		body, _ := ioutil.ReadAll(res.Body)
+		res, err := http.Get(url.String())
+		if err != nil {
+			log.Fatal(err)
+		}
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		var resp Response
-		_ = json.Unmarshal(body, &resp)
+		err = json.Unmarshal(body, &resp)
+		if err != nil {
+			log.Fatal(err)
+		}
 		pretty.Logln(resp)
 
 		t += h * 60 * 60
