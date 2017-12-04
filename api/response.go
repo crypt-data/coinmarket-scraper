@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"io/ioutil"
 	"log"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -56,26 +57,37 @@ func (tick *Tick) Put() {
 		Init()
 	}
 
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal("failed getting tx", err)
-	}
+	for {
 
-	stmt, err := tx.Prepare("insert or replace into EthToBtc (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal("failed preparing tick", tick, err)
-	}
-	defer stmt.Close()
+		tx, err := db.Begin()
+		if err != nil {
+			log.Println("failed getting tx", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
 
-	_, err = stmt.Exec(tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
-	if err != nil {
-		log.Fatal("failed execing tick", tick, err)
-	}
+		stmt, err := tx.Prepare("insert or replace into EthToBtc (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
+		if err != nil {
+			log.Println("failed preparing tick", tick, err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		defer stmt.Close()
 
-	if err := tx.Commit(); err != nil {
-		log.Fatal("failed committing tick", tick, err)
-	}
+		_, err = stmt.Exec(tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
+		if err != nil {
+			log.Println("failed execing tick", tick, err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
 
+		if err := tx.Commit(); err != nil {
+			log.Println("failed committing tick", tick, err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return
+	}
 }
 
 type ConversionTypeStruct struct {
