@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -62,7 +63,10 @@ func main() {
 
 		res, _ := http.Get(url.String())
 		body, _ := ioutil.ReadAll(res.Body)
-		pretty.Logln(string(body))
+
+		var resp Response
+		_ = json.Unmarshal(body, &resp)
+		pretty.Logln(resp)
 
 		t += h * 60 * 60
 	}
