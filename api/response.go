@@ -2,19 +2,14 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"log/syslog"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var (
-	db     *sql.DB
-	logger *syslog.Writer
-)
+var db *sql.DB
 
 type Response struct {
 	Status            string               `json:"Response"`
@@ -39,28 +34,19 @@ type Tick struct {
 
 func Init() {
 
-	syslogger, err := syslog.Dial("", "", syslog.LOG_USER, "")
-	if err != nil {
-		log.Fatal("syslog:", err)
-	}
-	logger = syslogger
-
 	database, err := sql.Open("sqlite3", "/keybase/team/crypt_data/EthToBtc.db")
 	if err != nil {
-		logger.Emerg("failed to open db")
-		log.Fatal("sqlite3:", err)
+		log.Fatal("[FATAL] sqlite3:", err)
 	}
 	db = database
 
 	b, err := ioutil.ReadFile("/Users/atec/go/src/github.com/crypt-data/coinmarket-scraper/create_table.sql")
 	if err != nil {
-		logger.Emerg("failed to read create_table.sql")
-		log.Fatal("unix:", err)
+		log.Fatal("[FATAL] unix:", err)
 	}
 
 	if _, err := db.Exec(string(b)); err != nil {
-		logger.Emerg("failed to create table")
-		log.Fatal("sqlite3:", err)
+		log.Fatal("[FATAL] sqlite3:", err)
 	}
 }
 
@@ -73,8 +59,8 @@ func (tick *Tick) Put() {
 
 	for {
 		if err := tick.put(); err != nil {
-			logger.Err("failed to put tick")
-			logger.Err(fmt.Sprintf("sqlite3: %v", err))
+			log.Println("[ERROR] failed to put tick")
+			log.Printf("[ERROR] sqlite3: %v", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
@@ -103,7 +89,7 @@ func (tick *Tick) put() error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-	logger.Info(fmt.Sprintf("successfully inserted tick (%d, %f, %f, %f, %f, %f, %f)", tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo))
+	log.Printf("[INFO] successfully inserted tick (%d, %f, %f, %f, %f, %f, %f)", tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
 	return nil
 }
 

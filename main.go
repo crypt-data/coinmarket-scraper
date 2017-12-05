@@ -11,15 +11,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/crypt-data/coinmarket-scraper/api"
-	"github.com/kr/pretty"
 )
 
 func get(u *url.URL) *api.Response {
 
-	res, err := http.Get(u.String())
+	url := u.String()
+	log.Println("[INFO] getting...", url)
+	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +32,6 @@ func get(u *url.URL) *api.Response {
 	if err != nil {
 		log.Fatal(err)
 	}
-	pretty.Logln(resp)
 
 	return &resp
 }
@@ -61,8 +62,6 @@ func main() {
 
 	t := 1439521878
 	for h := 0; h < 24*5; h++ {
-
-		pretty.Logln(u)
 
 		setQuery(u, t)
 
