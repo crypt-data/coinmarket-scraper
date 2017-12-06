@@ -34,7 +34,7 @@ type Tick struct {
 
 func Init() {
 
-	database, err := sql.Open("sqlite3", "/keybase/team/crypt_data/EthToBtc.db")
+	database, err := sql.Open("sqlite3", "/Users/atec/EthToBtc.db")
 	if err != nil {
 		log.Fatal("[FATAL] sqlite3:", err)
 	}
