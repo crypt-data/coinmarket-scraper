@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -60,17 +61,35 @@ func main() {
 		Path:   "data/histohour",
 	}
 
+	var Queue = make(chan api.Tick, 100)
+
+	go func() {
+		for {
+			select {
+			case job := <-Queue:
+				job.Put()
+			}
+		}
+	}()
+
 	t := 1439521878
 	for h := 0; h < 24*5; h++ {
 
-		setQuery(u, t)
+		go func(t int) {
 
-		resp := get(u)
+			setQuery(u, t)
 
-		for _, tick := range resp.Data {
-			tick.Put()
-		}
+			res := get(u)
+
+			for _, tick := range res.Data {
+				Queue <- tick
+			}
+		}(t)
 
 		t += h * 60 * 60
 	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	wg.Wait()
 }
