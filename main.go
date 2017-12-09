@@ -1,58 +1,21 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
-	"net/http"
 	"net/url"
-	"strconv"
-
-	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/crypt-data/coinmarket-scraper/api"
 )
 
-func get(u *url.URL) *api.Response {
-
-	url := u.String()
-	log.Println("[INFO] getting...", url)
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var resp api.Response
-	err = json.Unmarshal(body, &resp)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return &resp
-}
-
-func setQuery(u *url.URL, t int) {
-
-	q := u.Query()
-	for k, v := range map[string]string{
-		"fsym":      "ETH",
-		"tsym":      "BTC",
-		"limit":     "60",
-		"aggregate": "1",
-		"toTs":      strconv.Itoa(t),
-	} {
-		q.Set(k, v)
-	}
-	u.RawQuery = q.Encode()
-
-}
+const (
+	btcStart = 1281960000
+	ethStart = 1439164800
+)
 
 func main() {
+
+	series := &api.TimeSeries{
+		Name: "usd_to_btc",
+	}
 
 	var u = &url.URL{
 		Scheme: "https",
@@ -60,17 +23,14 @@ func main() {
 		Path:   "data/histohour",
 	}
 
-	t := 1439521878
-	for h := 0; h < 24*5; h++ {
+	now := 1512849201
+	for t := btcStart; t < now; t += 60 * 60 {
 
-		setQuery(u, t)
-
-		resp := get(u)
+		resp := api.Get(u, "USD", "BTC", t)
 
 		for _, tick := range resp.Data {
-			tick.Put()
+			series.Put(&tick)
 		}
 
-		t += h * 60 * 60
 	}
 }

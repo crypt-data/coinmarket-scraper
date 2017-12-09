@@ -1,4 +1,4 @@
-create table if not exists EthToBtc (
+create table if not exists eth_to_btc (
 
 	time       integer not null,
 	close      real    not null,

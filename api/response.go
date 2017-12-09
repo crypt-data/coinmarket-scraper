@@ -1,15 +1,13 @@
 package api
 
 import (
-	"database/sql"
+	"encoding/json"
 	"io/ioutil"
 	"log"
-	"time"
-
-	_ "github.com/mattn/go-sqlite3"
+	"net/http"
+	"net/url"
+	"strconv"
 )
-
-var db *sql.DB
 
 type Response struct {
 	Status            string               `json:"Response"`
@@ -22,75 +20,39 @@ type Response struct {
 	ConversionType    ConversionTypeStruct `json:"ConversionType"`
 }
 
-type Tick struct {
-	Time       int     `json:"time"`
-	Close      float64 `json:"close"`
-	High       float64 `json:"high"`
-	Low        float64 `json:"low"`
-	Open       float64 `json:"open"`
-	VolumeFrom float64 `json:"volumefrom"`
-	VolumeTo   float64 `json:"volumeto"`
-}
+func Get(u *url.URL, from, to string, t int) *Response {
 
-func Init() {
+	q := u.Query()
+	for k, v := range map[string]string{
+		"fsym":      from,
+		"tsym":      to,
+		"limit":     "60",
+		"aggregate": "1",
+		"toTs":      strconv.Itoa(t),
+	} {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
 
-	database, err := sql.Open("sqlite3", "/Users/atec/EthToBtc.db")
+	url := u.String()
+	log.Println("[INFO] getting...", url)
+	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal("[FATAL] sqlite3:", err)
+		log.Fatal(err)
 	}
-	db = database
 
-	b, err := ioutil.ReadFile("/Users/atec/go/src/github.com/crypt-data/coinmarket-scraper/create_table.sql")
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal("[FATAL] unix:", err)
+		log.Fatal(err)
 	}
 
-	if _, err := db.Exec(string(b)); err != nil {
-		log.Fatal("[FATAL] sqlite3:", err)
-	}
-}
-
-func (tick *Tick) Put() {
-
-	// lazily load db
-	if db == nil {
-		Init()
-	}
-
-	for {
-		if err := tick.put(); err != nil {
-			log.Println("[ERROR] failed to put tick")
-			log.Printf("[ERROR] sqlite3: %v", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		return
-	}
-}
-
-func (tick *Tick) put() error {
-
-	tx, err := db.Begin()
+	var resp Response
+	err = json.Unmarshal(body, &resp)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
-	stmt, err := tx.Prepare("insert or replace into EthToBtc (time, close, high, low, open, volumefrom, volumeto) values (?, ?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
-	if err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	log.Printf("[INFO] successfully inserted tick (%d, %f, %f, %f, %f, %f, %f)", tick.Time, tick.Close, tick.High, tick.Low, tick.Open, tick.VolumeFrom, tick.VolumeTo)
-	return nil
+	return &resp
 }
 
 type ConversionTypeStruct struct {
