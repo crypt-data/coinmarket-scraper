@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
+
+	"github.com/kr/pretty"
 )
 
 type Response struct {
@@ -50,6 +53,12 @@ func Get(u *url.URL, from, to string, t int) *Response {
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if len(resp.Data) == 0 {
+		pretty.Logln("[INFO] ", resp)
+		time.Sleep(1 * time.Minute)
+		resp = *Get(u, from, to, t)
 	}
 
 	return &resp
