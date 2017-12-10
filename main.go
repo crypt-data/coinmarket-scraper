@@ -2,17 +2,19 @@ package main
 
 import (
 	"net/url"
+	"time"
 
 	"github.com/crypt-data/coinmarket-scraper/api"
 )
 
 const (
-	btcStart = 1281960000
-	ethStart = 1439164800
+	btcStart int64 = 1281960000
+	ethStart int64 = 1439164800
 )
 
 func main() {
 
+	// TODO paramaterize to and from with flags
 	series := &api.TimeSeries{
 		Name: "usd_to_btc",
 	}
@@ -23,10 +25,13 @@ func main() {
 		Path:   "data/histohour",
 	}
 
-	now := 1512849201
+	now := time.Now().Unix()
+
+	// TODO paramaterize term with flags
 	for t := btcStart; t < now; t += 60 * 60 * 60 {
 
-		resp := api.Get(u, "USD", "BTC", t)
+		// TODO paramaterize to and from with flags
+		resp := api.Get(u, "USD", "BTC", int(t))
 
 		for _, tick := range resp.Data {
 			series.Put(&tick)
