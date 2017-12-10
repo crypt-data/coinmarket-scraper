@@ -24,7 +24,7 @@ func main() {
 	}
 
 	now := 1512849201
-	for t := btcStart; t < now; t += 60 * 60 {
+	for t := btcStart; t < now; t += 60 * 60 * 60 {
 
 		resp := api.Get(u, "USD", "BTC", t)
 
