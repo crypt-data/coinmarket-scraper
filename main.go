@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/crypt-data/coinmarket-scraper/api"
@@ -12,11 +14,18 @@ const (
 	ethStart int64 = 1439164800
 )
 
+var (
+	to   = flag.String("to", "eth", "to")
+	from = flag.String("from", "btc", "from")
+)
+
 func main() {
 
-	// TODO paramaterize to and from with flags
+	flag.Parse()
+
+	// TODO stay dry by encapsulating gets
 	series := &api.TimeSeries{
-		Name: "usd_to_btc",
+		Name: *to + "_to_" + *from,
 	}
 
 	var u = &url.URL{
@@ -27,11 +36,18 @@ func main() {
 
 	now := time.Now().Unix()
 
-	// TODO paramaterize term with flags
-	for t := btcStart; t < now; t += 60 * 60 * 60 {
+	var start int64
+	if *to == "eth" {
+		start = ethStart
+	} else if *to == "usd" {
+		start = btcStart
+	}
 
-		// TODO paramaterize to and from with flags
-		resp := api.Get(u, "USD", "BTC", int(t))
+	// TODO paramaterize term with flags
+	for t := start; t < now; t += 60 * 60 * 60 {
+
+		// TODO stay dry by encapsulating gets
+		resp := api.Get(u, strings.ToUpper(*to), strings.ToUpper(*from), int(t))
 
 		for _, tick := range resp.Data {
 			series.Put(&tick)
