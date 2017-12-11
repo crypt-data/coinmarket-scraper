@@ -44,7 +44,7 @@ func (series *TimeSeries) Run() {
 		resp := Get(u, series.To, series.From, int(t))
 
 		for _, tick := range resp.Data {
-			series.Put(&tick)
+			series.put(&tick)
 		}
 	}
 }
@@ -67,7 +67,7 @@ func (series *TimeSeries) init() {
 	}
 }
 
-func (series *TimeSeries) Put(tick *Tick) {
+func (series *TimeSeries) put(tick *Tick) {
 
 	// lazily load db
 	if series.db == nil {
