@@ -4,15 +4,49 @@ import (
 	"database/sql"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const (
+	btcStart int64 = 1281960000
+	ethStart int64 = 1439164800
+)
+
 type TimeSeries struct {
 	Name string
+	To   string
+	From string
 
 	db *sql.DB
+}
+
+func (series *TimeSeries) Run() {
+
+	var start int64
+	if series.To == "eth" {
+		start = ethStart
+	} else if series.To == "usd" {
+		start = btcStart
+	}
+
+	var u = &url.URL{
+		Scheme: "https",
+		Host:   "min-api.cryptocompare.com",
+		Path:   "data/histohour",
+	}
+
+	// TODO paramaterize term with flags
+	for t := start; t < time.Now().Unix(); t += 60 * 60 * 60 {
+
+		resp := Get(u, series.To, series.From, int(t))
+
+		for _, tick := range resp.Data {
+			series.Put(&tick)
+		}
+	}
 }
 
 func (series *TimeSeries) init() {
