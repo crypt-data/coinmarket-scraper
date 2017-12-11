@@ -34,8 +34,6 @@ func main() {
 		Path:   "data/histohour",
 	}
 
-	now := time.Now().Unix()
-
 	var start int64
 	if *to == "eth" {
 		start = ethStart
@@ -44,7 +42,7 @@ func main() {
 	}
 
 	// TODO paramaterize term with flags
-	for t := start; t < now; t += 60 * 60 * 60 {
+	for t := start; t < time.Now().Unix(); t += 60 * 60 * 60 {
 
 		// TODO stay dry by encapsulating gets
 		resp := api.Get(u, strings.ToUpper(*to), strings.ToUpper(*from), int(t))
