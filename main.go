@@ -16,7 +16,6 @@ func main() {
 
 	flag.Parse()
 
-	// TODO stay dry by encapsulating gets
 	series := &api.TimeSeries{
 		Name: *to + "_to_" + *from,
 		To:   strings.ToUpper(*to),
