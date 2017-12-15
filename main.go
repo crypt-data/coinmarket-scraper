@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	to   = flag.String("to", "eth", "to")
-	from = flag.String("from", "btc", "from")
+	from = flag.String("from", "eth", "to")
+	to   = flag.String("to", "btc", "from")
 )
 
 func main() {
@@ -17,9 +17,9 @@ func main() {
 	flag.Parse()
 
 	series := &api.TimeSeries{
-		Name: *to + "_to_" + *from,
-		To:   strings.ToUpper(*to),
+		Name: *from + "_to_" + *to,
 		From: strings.ToUpper(*from),
+		To:   strings.ToUpper(*to),
 	}
 
 	series.Run()

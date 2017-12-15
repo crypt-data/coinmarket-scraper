@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
+	"os"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -17,8 +18,8 @@ const (
 
 type TimeSeries struct {
 	Name string
-	To   string
 	From string
+	To   string
 
 	db *sql.DB
 }
@@ -26,9 +27,9 @@ type TimeSeries struct {
 func (series *TimeSeries) Run() {
 
 	var start int64
-	if series.To == "eth" {
+	if series.From == "ETH" {
 		start = ethStart
-	} else if series.To == "usd" {
+	} else if series.From == "USD" {
 		start = btcStart
 	}
 
@@ -41,7 +42,7 @@ func (series *TimeSeries) Run() {
 	// TODO paramaterize term with flags
 	for t := start; t < time.Now().Unix(); t += 60 * 60 * 60 {
 
-		resp := Get(u, series.To, series.From, int(t))
+		resp := Get(u, series.From, series.To, int(t))
 
 		for _, tick := range resp.Data {
 			series.put(&tick)
@@ -51,19 +52,23 @@ func (series *TimeSeries) Run() {
 
 func (series *TimeSeries) init() {
 
-	database, err := sql.Open("sqlite3", "/Users/atec/"+series.Name+".db")
+	dbPath := os.Getenv("HOME") + "/" + series.Name + ".db"
+	log.Println("[INFO] opening db at", dbPath)
+	database, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Fatal("[FATAL] sqlite3:", err)
+		log.Fatal("[FATAL] sqlite3: ", err)
 	}
 	series.db = database
 
-	b, err := ioutil.ReadFile("/Users/atec/go/src/github.com/crypt-data/coinmarket-scraper/create_" + series.Name + ".sql")
+	tablePath := os.Getenv("GOPATH") + "/src/github.com/crypt-data/coinmarket-scraper/create_" + series.Name + ".sql"
+	log.Println("[INFO] creating table from", tablePath)
+	b, err := ioutil.ReadFile(tablePath)
 	if err != nil {
-		log.Fatal("[FATAL] unix:", err)
+		log.Fatal("[FATAL] unix: ", err)
 	}
 
 	if _, err := series.db.Exec(string(b)); err != nil {
-		log.Fatal("[FATAL] sqlite3:", err)
+		log.Fatal("[FATAL] sqlite3: ", err)
 	}
 }
 
