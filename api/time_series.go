@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
+	"os"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -51,19 +52,23 @@ func (series *TimeSeries) Run() {
 
 func (series *TimeSeries) init() {
 
-	database, err := sql.Open("sqlite3", "/Users/atec/"+series.Name+".db")
+	dbPath := os.Getenv("HOME")+"/"+series.Name+".db"
+	log.Println("[INFO] opening db at", dbPath)
+	database, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Fatal("[FATAL] sqlite3:", err)
+		log.Fatal("[FATAL] sqlite3: ", err)
 	}
 	series.db = database
 
-	b, err := ioutil.ReadFile("/Users/atec/go/src/github.com/crypt-data/coinmarket-scraper/create_" + series.Name + ".sql")
+	tablePath := os.Getenv("GOPATH")+ "/src/github.com/crypt-data/coinmarket-scraper/create_" + series.Name + ".sql"
+	log.Println("[INFO] creating table from", tablePath)
+	b, err := ioutil.ReadFile(tablePath)
 	if err != nil {
-		log.Fatal("[FATAL] unix:", err)
+		log.Fatal("[FATAL] unix: ", err)
 	}
 
 	if _, err := series.db.Exec(string(b)); err != nil {
-		log.Fatal("[FATAL] sqlite3:", err)
+		log.Fatal("[FATAL] sqlite3: ", err)
 	}
 }
 
