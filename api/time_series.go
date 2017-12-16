@@ -26,6 +26,8 @@ type TimeSeries struct {
 
 func (series *TimeSeries) Run() {
 
+	series.init()
+
 	var start int64
 	start, err := series.getLatestTick()
 	if err != nil {
@@ -54,11 +56,6 @@ func (series *TimeSeries) Run() {
 }
 
 func (series *TimeSeries) getLatestTick() (int64, error) {
-
-	// lazily load db
-	if series.db == nil {
-		series.init()
-	}
 
 	log.Println("[INFO] getting latest tick...")
 
