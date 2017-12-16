@@ -23,7 +23,7 @@ type Response struct {
 	ConversionType    ConversionTypeStruct `json:"ConversionType"`
 }
 
-func Get(u *url.URL, from, to string, t int) *Response {
+func get(u *url.URL, from, to string, t int) *Response {
 
 	for {
 		q := u.Query()

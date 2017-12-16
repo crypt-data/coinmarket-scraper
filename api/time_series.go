@@ -47,7 +47,7 @@ func (series *TimeSeries) Run() {
 	// TODO paramaterize term with flags
 	for t := start; t < time.Now().Unix(); t += 60 * 60 * 60 {
 
-		resp := Get(u, series.From, series.To, int(t))
+		resp := get(u, series.From, series.To, int(t))
 
 		for _, tick := range resp.Data {
 			series.put(&tick)
