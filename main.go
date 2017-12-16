@@ -17,9 +17,10 @@ func main() {
 	flag.Parse()
 
 	series := &api.TimeSeries{
-		Name: *from + "_to_" + *to,
-		From: strings.ToUpper(*from),
-		To:   strings.ToUpper(*to),
+		Name:  *from + "_to_" + *to,
+		From:  strings.ToUpper(*from),
+		To:    strings.ToUpper(*to),
+		Delta: "minute",
 	}
 
 	series.Run()

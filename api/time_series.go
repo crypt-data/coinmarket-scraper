@@ -19,18 +19,15 @@ const (
 )
 
 type TimeSeries struct {
-	Name string
-	From string
-	To   string
-
-	delta string
+	Name  string
+	From  string
+	To    string
+	Delta string
 
 	db *sql.DB
 }
 
 func (series *TimeSeries) Run() {
-
-	series.delta = "minute"
 
 	series.init()
 
@@ -43,14 +40,21 @@ func (series *TimeSeries) Run() {
 		}
 	}
 
+	var delta int64
+	if series.Delta == "minute" {
+		delta = 60
+	} else if series.Delta == "hour" {
+		delta = 3600
+	}
+
 	var u = &url.URL{
 		Scheme: "https",
 		Host:   "min-api.cryptocompare.com",
-		Path:   "data/histo" + series.delta,
+		Path:   "data/histo" + series.Delta,
 	}
 
 	// TODO paramaterize term with flags
-	for t := start; t < time.Now().Unix(); t += limit * 60 {
+	for t := start; t < time.Now().Unix(); t += limit * delta {
 
 		resp := get(u, series.From, series.To, int(limit), int(t))
 
