@@ -39,7 +39,7 @@ func get(u *url.URL, from, to string, t int) *Response {
 		u.RawQuery = q.Encode()
 
 		url := u.String()
-		log.Println("[INFO] getting...", url)
+		log.Println("[INFO] getting", url, "...")
 		res, err := http.Get(url)
 		if err != nil {
 			log.Fatal(err)
