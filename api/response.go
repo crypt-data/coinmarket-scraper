@@ -25,44 +25,46 @@ type Response struct {
 
 func Get(u *url.URL, from, to string, t int) *Response {
 
-	q := u.Query()
-	for k, v := range map[string]string{
-		"fsym":      from,
-		"tsym":      to,
-		"limit":     "60",
-		"aggregate": "1",
-		"toTs":      strconv.Itoa(t),
-	} {
-		q.Set(k, v)
-	}
-	u.RawQuery = q.Encode()
+	for {
+		q := u.Query()
+		for k, v := range map[string]string{
+			"fsym":      from,
+			"tsym":      to,
+			"limit":     "60",
+			"aggregate": "1",
+			"toTs":      strconv.Itoa(t),
+		} {
+			q.Set(k, v)
+		}
+		u.RawQuery = q.Encode()
 
-	url := u.String()
-	log.Println("[INFO] getting...", url)
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
+		url := u.String()
+		log.Println("[INFO] getting...", url)
+		res, err := http.Get(url)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	var resp Response
-	err = json.Unmarshal(body, &resp)
-	if err != nil {
-		log.Fatal(err)
-	}
+		var resp Response
+		err = json.Unmarshal(body, &resp)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// TODO hack to deal with rate limiting
-	if len(resp.Data) == 0 {
-		pretty.Logln("[INFO] ", resp)
-		time.Sleep(1 * time.Minute)
-		resp = *Get(u, from, to, t)
-	}
+		// TODO check error
+		if len(resp.Data) == 0 {
+			pretty.Logln("[INFO] ", resp)
+			time.Sleep(1 * time.Minute)
+			continue
+		}
 
-	return &resp
+		return &resp
+	}
 }
 
 type ConversionTypeStruct struct {
