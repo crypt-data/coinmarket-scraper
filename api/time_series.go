@@ -14,6 +14,8 @@ import (
 const (
 	btcStart int64 = 1281960000
 	ethStart int64 = 1439164800
+
+	limit int64 = 60
 )
 
 type TimeSeries struct {
@@ -21,7 +23,6 @@ type TimeSeries struct {
 	From string
 	To   string
 
-	limit int64
 	delta string
 
 	db *sql.DB
@@ -29,7 +30,6 @@ type TimeSeries struct {
 
 func (series *TimeSeries) Run() {
 
-	series.limit = 60
 	series.delta = "minute"
 
 	series.init()
@@ -50,9 +50,9 @@ func (series *TimeSeries) Run() {
 	}
 
 	// TODO paramaterize term with flags
-	for t := start; t < time.Now().Unix(); t += series.limit * 60 {
+	for t := start; t < time.Now().Unix(); t += limit * 60 {
 
-		resp := get(u, series.From, series.To, int(series.limit), int(t))
+		resp := get(u, series.From, series.To, int(limit), int(t))
 
 		for _, tick := range resp.Data {
 			series.put(&tick)
