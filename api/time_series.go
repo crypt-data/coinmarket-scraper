@@ -27,10 +27,13 @@ type TimeSeries struct {
 func (series *TimeSeries) Run() {
 
 	var start int64
-	if series.From == "ETH" {
-		start = ethStart
-	} else if series.From == "USD" {
-		start = btcStart
+	start, err := series.getLatestTick()
+	if err != nil {
+		if series.From == "ETH" {
+			start = ethStart
+		} else if series.From == "USD" {
+			start = btcStart
+		}
 	}
 
 	var u = &url.URL{
@@ -48,6 +51,25 @@ func (series *TimeSeries) Run() {
 			series.put(&tick)
 		}
 	}
+}
+
+func (series *TimeSeries) getLatestTick() (int64, error) {
+
+	// lazily load db
+	if series.db == nil {
+		series.init()
+	}
+
+	log.Println("[INFO] getting latest tick...")
+
+	var latest int
+	err := series.db.QueryRow("select time from " + series.Name + " order by time desc limit 1").Scan(&latest)
+	if err != nil || &latest == nil {
+		log.Println("[ERROR] sqlite3:", err)
+		return -1, err
+	}
+
+	return int64(latest), nil
 }
 
 func (series *TimeSeries) init() {
