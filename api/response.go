@@ -28,11 +28,10 @@ func get(u *url.URL, from, to string, limit, t int) *Response {
 	for {
 		q := u.Query()
 		for k, v := range map[string]string{
-			"fsym":      from,
-			"tsym":      to,
-			"limit":     strconv.Itoa(limit),
-			"aggregate": "1",
-			"toTs":      strconv.Itoa(t),
+			"fsym":  from,
+			"tsym":  to,
+			"limit": strconv.Itoa(limit),
+			"toTs":  strconv.Itoa(t),
 		} {
 			q.Set(k, v)
 		}
