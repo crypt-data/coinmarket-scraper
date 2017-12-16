@@ -34,7 +34,6 @@ func (series *TimeSeries) Run() {
 
 	series.init()
 
-	var start int64
 	start, err := series.getLatestTick()
 	if err != nil {
 		if series.From == "ETH" {
