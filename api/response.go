@@ -12,7 +12,7 @@ import (
 	"github.com/kr/pretty"
 )
 
-type Response struct {
+type response struct {
 	Status            string               `json:"Response"`
 	Type              int                  `json:"Type"`
 	Aggregated        bool                 `json:"Aggregated"`
@@ -23,7 +23,7 @@ type Response struct {
 	ConversionType    ConversionTypeStruct `json:"ConversionType"`
 }
 
-func get(u *url.URL, from, to string, limit, t int) *Response {
+func get(u *url.URL, from, to string, limit, t int) *response {
 
 	for {
 		q := u.Query()
@@ -49,7 +49,7 @@ func get(u *url.URL, from, to string, limit, t int) *Response {
 			log.Fatal(err)
 		}
 
-		var resp Response
+		var resp response
 		err = json.Unmarshal(body, &resp)
 		if err != nil {
 			log.Fatal(err)
