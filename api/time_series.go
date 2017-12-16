@@ -61,6 +61,24 @@ func (series *TimeSeries) Run() {
 	}
 }
 
+func (series *TimeSeries) put(tick *Tick) {
+
+	// lazily load db
+	if series.db == nil {
+		series.init()
+	}
+
+	for {
+		if err := tick.Put(series.Name, series.db); err != nil {
+			log.Println("[ERROR] failed to put tick")
+			log.Printf("[ERROR] sqlite3: %v", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return
+	}
+}
+
 func (series *TimeSeries) getLatestTick() (int64, error) {
 
 	log.Println("[INFO] getting latest tick...")
@@ -94,23 +112,5 @@ func (series *TimeSeries) init() {
 
 	if _, err := series.db.Exec(string(b)); err != nil {
 		log.Fatal("[FATAL] sqlite3: ", err)
-	}
-}
-
-func (series *TimeSeries) put(tick *Tick) {
-
-	// lazily load db
-	if series.db == nil {
-		series.init()
-	}
-
-	for {
-		if err := tick.Put(series.Name, series.db); err != nil {
-			log.Println("[ERROR] failed to put tick")
-			log.Printf("[ERROR] sqlite3: %v", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		return
 	}
 }
