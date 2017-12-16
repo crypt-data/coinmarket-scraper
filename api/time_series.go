@@ -21,10 +21,16 @@ type TimeSeries struct {
 	From string
 	To   string
 
+	limit int64
+	delta string
+
 	db *sql.DB
 }
 
 func (series *TimeSeries) Run() {
+
+	series.limit = 60
+	series.delta = "minute"
 
 	series.init()
 
@@ -41,13 +47,13 @@ func (series *TimeSeries) Run() {
 	var u = &url.URL{
 		Scheme: "https",
 		Host:   "min-api.cryptocompare.com",
-		Path:   "data/histohour",
+		Path:   "data/histo" + series.delta,
 	}
 
 	// TODO paramaterize term with flags
-	for t := start; t < time.Now().Unix(); t += 60 * 60 * 60 {
+	for t := start; t < time.Now().Unix(); t += series.limit * 60 {
 
-		resp := get(u, series.From, series.To, int(t))
+		resp := get(u, series.From, series.To, int(series.limit), int(t))
 
 		for _, tick := range resp.Data {
 			series.put(&tick)
