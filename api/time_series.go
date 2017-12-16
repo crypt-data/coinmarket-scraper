@@ -61,7 +61,7 @@ func (series *TimeSeries) getLatestTick() (int64, error) {
 
 	var latest int
 	err := series.db.QueryRow("select time from " + series.Name + " order by time desc limit 1").Scan(&latest)
-	if err != nil || &latest == nil {
+	if err != nil {
 		log.Println("[ERROR] sqlite3:", err)
 		return -1, err
 	}
