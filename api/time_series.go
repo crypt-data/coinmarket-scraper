@@ -56,6 +56,7 @@ func (series *TimeSeries) Run() {
 	// TODO paramaterize term with flags
 	for t := start; t < time.Now().Unix(); t += limit * delta {
 
+		// TODO return and check error (for minute and hours in particular)
 		resp := get(u, series.From, series.To, int(limit), int(t))
 
 		for _, tick := range resp.Data {
