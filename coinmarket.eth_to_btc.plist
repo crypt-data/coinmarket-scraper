@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>coinmarket.eth_to_btc</string>
+
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/atec/go/bin/coinmarket-scraper</string>
+		<string>-from</string>
+		<string>eth</string>
+		<string>-to</string>
+		<string>btc</string>
+	</array>
+
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>/Users/atec</string>
+		<key>GOPATH</key>
+		<string>/Users/atec/go</string>
+	</dict>
+	
+	<key>StandardOutPath</key>
+	<string>/Users/atec/Library/Logs/coinmarket.eth_to_btc.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/atec/Library/Logs/coinmarket.eth_to_btc.log</string>
+
+	<key>RunAtLoad</key>
+	<true/>
+
+	<key>StartInterval</key>
+	<integer>21600</integer>
+</dict>
+</plist>`
