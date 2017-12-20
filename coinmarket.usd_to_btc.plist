@@ -30,6 +30,6 @@
 	<true/>
 
 	<key>StartInterval</key>
-	<integer>10800</integer>
+	<integer>5400</integer>
 </dict>
 </plist>`
